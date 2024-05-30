@@ -10,24 +10,22 @@ export default function App() {
   const [lastName, setLastName] = useState('');
   const [guestList, setGuestList] = useState([]);
 
-  // show all guests in list (from express-guest-list-api)
+  // Setup initial state for loading from api
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Async function to show all guests in list (from express-guest-list-api)
   useEffect(() => {
     async function showList() {
       const response = await fetch(`${baseUrl}/guests`);
       const list = await response.json();
       setGuestList(list);
+      setIsLoading(false);
     }
+
     showList().catch((error) => console.log(error));
   }, []);
 
-  // Getting single guest from list (from express-guest-list-api)
-
-  async function retrieveOneGuest() {
-    const response = await fetch(`${baseUrl}/guests/:id`);
-    const guest = await response.json();
-  }
-
-  // Function for creating new Guest with POST method
+  // Async Function for creating new Guest with POST method(from express-guest-list-api)
   async function addGuest() {
     const guestInputs = {
       firstName: firstName,
@@ -44,45 +42,99 @@ export default function App() {
     const createdGuest = await response.json();
     const newGuestList = [...guestList, createdGuest];
 
+    setGuestList(newGuestList); // update the guest list
+    setFirstName(''); // clear the input fields
+    setLastName('');
+  }
+
+  // Updating a guest attendance status in list with PUT method (from express-guest-list-api)
+  async function changeAttendance(id, attending) {
+    const change = !attending;
+    const response = await fetch(`${baseUrl}/guests/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ attending: change }),
+    });
+    const updatedAttendance = await response.json();
+
+    // Check to see if guest id matches and if yes return guest id with new status, otherwise just return the original data
+    const newGuestList = guestList.map((guest) => {
+      if (guest.id === id) {
+        return { ...guest, attending: updatedAttendance.attending };
+      } else {
+        return guest;
+      }
+    });
     setGuestList(newGuestList);
   }
 
-  // Updating a guest in list with PUT method (from express-guest-list-api)
-  /* const response = await fetch(`${baseUrl}/guests/1`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ attending: true }),
-  });
-  const updatedGuest = await response.json();
-  */
-
+  // Async function to delete a guest from the list with DELETE method (from express-guest-list-api)
   async function removeGuest(id) {
-    if (id.length > 0) {
-      const response = await fetch(`${baseUrl}/guests/${id}`, {
-        method: 'DELETE',
-      });
-      const deletedGuest = await response.json();
-      const currentGuestList = [...guestList];
-      const newGuestList = currentGuestList.filter(
-        (guest) => guest.id !== deletedGuest.id,
-      );
-      setGuestList(newGuestList);
-    }
+    const response = await fetch(`${baseUrl}/guests/${id}`, {
+      method: 'DELETE',
+    });
+    const deletedGuest = await response.json();
+    const newGuestList = guestList.filter(
+      (guest) => guest.id !== deletedGuest.id,
+    );
+    setGuestList(newGuestList);
   }
 
+  // Display the Guest first and last names as well a checkbox to indicate attendance and a button to remove the guest from the list.
+  let guestNames;
+  if (guestList.length > 0) {
+    guestNames = (
+      <ul>
+        {guestList.map((guest) => (
+          <li key={`guestID-${guest.id}`}>
+            {guest.firstName} {guest.lastName}
+            <br />
+            {/* Checkbox for setting attendance*/}
+            <input
+              aria-label={`${guest.firstName} ${guest.lastName} attending status`}
+              type="checkbox"
+              checked={guest.attending}
+              onChange={() => {
+                changeAttendance(guest.id, guest.attending).catch((error) =>
+                  console.log(error),
+                );
+              }}
+            />
+            <span>{guest.attending ? 'Attending' : 'Not Attending'}</span>
+            <br />
+            {/* Button to remove guest from guest list*/}
+            <button
+              aria-label={`Remove ${guest.firstName} ${guest.lastName}`}
+              onClick={() => {
+                removeGuest(guest.id).catch((error) => console.log(error));
+              }}
+            >
+              Remove
+            </button>
+          </li>
+        ))}
+      </ul>
+    );
+  } else {
+    guestNames = <p>No current Guests</p>;
+  }
+
+  if (isLoading) {
+    return <h1>Guest List Loading...</h1>;
+  }
   return (
     <main>
       <div>
-        <h1>Guest List</h1>
+        <h1>React Guest List Project</h1>
         <div data-test-id="guest">
           <form onSubmit={(event) => event.preventDefault()}>
             <label htmlFor="First name">First Name: </label>
             <input
               id="First name"
               name="First name"
-              placeholder="First Name"
+              placeholder="Guest First Name"
               value={firstName}
               onChange={(event) => setFirstName(event.currentTarget.value)}
             />
@@ -91,7 +143,7 @@ export default function App() {
             <input
               id="Last name"
               name="Last name"
-              placeholder="Last Name"
+              placeholder="Guest Last Name"
               value={lastName}
               onChange={(event) => setLastName(event.currentTarget.value)}
               onKeyDown={(event) => {
@@ -103,7 +155,7 @@ export default function App() {
           </form>
           <div>
             <h2>Current Guest List</h2>
-            <div>list of guests will be here</div>
+            <div data-test-id="guest">{guestNames}</div>
           </div>
         </div>
       </div>
