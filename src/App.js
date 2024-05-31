@@ -1,5 +1,6 @@
 import './App.css';
 import { useEffect, useState } from 'react';
+import styles from './App.module.scss';
 
 // URL for the API
 const baseUrl = 'https://jzc57q-4000.csb.app';
@@ -86,9 +87,9 @@ export default function App() {
   let guestNames;
   if (guestList.length > 0) {
     guestNames = (
-      <ul>
+      <ul className={styles.ul}>
         {guestList.map((guest) => (
-          <li key={`guestID-${guest.id}`}>
+          <li key={`guestID-${guest.id}`} className={styles.guestCard}>
             {guest.firstName} {guest.lastName}
             <br />
             {/* Checkbox for setting attendance*/}
@@ -126,8 +127,12 @@ export default function App() {
   }
   return (
     <main>
-      <div>
-        <h1>React Guest List Project</h1>
+      <div className={styles.mainDiv}>
+        <h1 className={styles.topHeading}>Guest List</h1>
+        <p>
+          To add guest, type First name and Last name in given fields and press
+          Enter/Return
+        </p>
         <div data-test-id="guest">
           <form onSubmit={(event) => event.preventDefault()}>
             <label htmlFor="First name">First Name: </label>
@@ -155,9 +160,14 @@ export default function App() {
           </form>
           <div>
             <h2>Current Guest List</h2>
-            <div data-test-id="guest">{guestNames}</div>
+            <div className={styles.cardView} data-test-id="guest">
+              {guestNames}
+            </div>
           </div>
         </div>
+        <footer className={styles.footer}>
+          React Guest List project made by M Devis
+        </footer>
       </div>
     </main>
   );
