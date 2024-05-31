@@ -89,7 +89,11 @@ export default function App() {
     guestNames = (
       <ul className={styles.ul}>
         {guestList.map((guest) => (
-          <li key={`guestID-${guest.id}`} className={styles.guestCard}>
+          <li
+            key={`guestID-${guest.id}`}
+            className={styles.guestCard}
+            data-test-id="guest"
+          >
             {guest.firstName} {guest.lastName}
             <br />
             {/* Checkbox for setting attendance*/}
@@ -133,7 +137,7 @@ export default function App() {
           To add guest, type First name and Last name in given fields and press
           Enter/Return
         </p>
-        <div data-test-id="guest">
+        <div>
           <form onSubmit={(event) => event.preventDefault()}>
             <label htmlFor="First name">First name </label>
             <input
@@ -160,9 +164,7 @@ export default function App() {
           </form>
           <div>
             <h2>Current Guest List</h2>
-            <div className={styles.cardView} data-test-id="guest">
-              {guestNames}
-            </div>
+            <div className={styles.cardView}>{guestNames}</div>
           </div>
         </div>
         <footer className={styles.footer}>
