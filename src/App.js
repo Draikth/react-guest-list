@@ -135,7 +135,7 @@ export default function App() {
         </p>
         <div data-test-id="guest">
           <form onSubmit={(event) => event.preventDefault()}>
-            <label htmlFor="First name">First Name: </label>
+            <label htmlFor="First name">First name </label>
             <input
               id="First name"
               name="First name"
@@ -144,7 +144,7 @@ export default function App() {
               onChange={(event) => setFirstName(event.currentTarget.value)}
             />
             <br />
-            <label htmlFor="Last name">Last Name: </label>
+            <label htmlFor="Last name">Last name </label>
             <input
               id="Last name"
               name="Last name"
